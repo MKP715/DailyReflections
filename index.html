@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AA Daily Reflections</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #1a3a6b;
+            --accent-color: #4a90e2;
+            --text-color: #333;
+            --light-bg: #f5f7fa;
+            --white: #ffffff;
+            --error-color: #d32f2f;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Home View Styles */
+        .home-content {
+            display: grid;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: var(--secondary-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .api-docs code {
+            background: var(--light-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: var(--secondary-color);
+        }
+
+        .api-docs pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .api-docs ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .api-docs li {
+            margin: 8px 0;
+        }
+
+        /* Calendar Widget Styles */
+        .calendar-widget {
+            text-align: center;
+        }
+
+        .calendar-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-controls select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--white);
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .calendar-controls select:hover {
+            border-color: var(--accent-color);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .calendar-day-header {
+            font-weight: bold;
+            padding: 10px;
+            color: var(--secondary-color);
+            font-size: 0.9em;
+        }
+
+        .calendar-day {
+            padding: 15px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--white);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .calendar-day:hover {
+            background: var(--accent-color);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+            background: transparent;
+        }
+
+        .calendar-day.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Reflection View Styles */
+        .reflection-content {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .reflection-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .reflection-date {
+            color: var(--accent-color);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .reflection-title {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .reflection-section {
+            margin: 30px 0;
+        }
+
+        .reflection-section h3 {
+            color: var(--secondary-color);
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reflection-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .reflection-source {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 30px;
+            transition: background 0.3s;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+
+        .back-button:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Error View Styles */
+        .error-content {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 60px 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 4em;
+            color: var(--error-color);
+            margin-bottom: 20px;
+        }
+
+        .error-content h2 {
+            color: var(--error-color);
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .error-content p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .reflection-content {
+                padding: 25px;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                padding: 10px 5px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AA Daily Reflections</h1>
+        <p>A daily companion for your spiritual journey</p>
+    </header>
+
+    <div class="container">
+        <!-- Home View -->
+        <div id="home-view" class="view active">
+            <div class="home-content">
+                <div class="card api-docs">
+                    <h2>API Documentation</h2>
+                    <p>Access daily reflections programmatically using our simple URL-based API.</p>
+
+                    <h3>Endpoint Format</h3>
+                    <p>To retrieve a specific daily reflection, use the following URL format:</p>
+                    <pre>https://aadailyreflections.org/{month}-{date}</pre>
+                    <p><small><em>Note: When testing locally, use hash-based URLs: <code>index.html#{month}-{date}</code></em></small></p>
+
+                    <h3>Parameters</h3>
+                    <ul>
+                        <li><code>month</code> - Numeric month (1-12)</li>
+                        <li><code>date</code> - Numeric day (1-31)</li>
+                    </ul>
+
+                    <h3>Example Requests</h3>
+                    <pre>https://aadailyreflections.org/1-2    # January 2
+https://aadailyreflections.org/12-25  # December 25
+
+# Local testing
+index.html#1-2    # January 2
+index.html#12-25  # December 25</pre>
+
+                    <h3>Response Format</h3>
+                    <p>The API returns a JSON object with the following structure:</p>
+                    <pre>{
+  "bookName": "dailyReflections",
+  "month": 1,
+  "date": 2,
+  "title": "FIRST, THE FOUNDATION",
+  "reflection": ["paragraph 1", "paragraph 2", ...],
+  "source": {
+    "bookName": "AS BILL SEES IT",
+    "page": 8
+  },
+  "explanation": ["paragraph 1", "paragraph 2", ...]
+}</pre>
+
+                    <h3>Error Handling</h3>
+                    <p>If an invalid date is provided, you'll receive an error page indicating that the data does not exist.</p>
+                </div>
+
+                <div class="card calendar-widget">
+                    <h2>Select a Date</h2>
+                    <div class="calendar-controls">
+                        <select id="month-select" aria-label="Select month">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reflection View -->
+        <div id="reflection-view" class="view">
+            <div class="reflection-content">
+                <div class="reflection-header">
+                    <div class="reflection-date" id="reflection-date"></div>
+                    <h1 class="reflection-title" id="reflection-title"></h1>
+                </div>
+
+                <div class="reflection-section">
+                    <h3>Reflection</h3>
+                    <div id="reflection-text"></div>
+                    <div class="reflection-source" id="reflection-source"></div>
+                </div>
+
+                <div class="reflection-section">
+                    <h3>Meditation</h3>
+                    <div id="explanation-text"></div>
+                </div>
+
+                <button type="button" class="back-button" onclick="navigateToHome()">Back to Calendar</button>
+            </div>
+        </div>
+
+        <!-- Error View -->
+        <div id="error-view" class="view">
+            <div class="error-content">
+                <div class="error-icon">�</div>
+                <h2>Data Not Found</h2>
+                <p>The requested reflection does not exist. Please check the date and try again.</p>
+                <button type="button" class="back-button" onclick="navigateToHome()">Return to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Daily Reflections Data
+        const dailyReflections = {
+            "1-2": {
+                bookName: "dailyReflections",
+                month: 1,
+                date: 2,
+                title: "FIRST, THE FOUNDATION",
+                reflection: [
+                    "Is sobriety all that we can expect of a spiritual awakening? No, sobriety is only a bare beginning."
+                ],
+                source: {
+                    bookName: "AS BILL SEES IT",
+                    page: 8
+                },
+                explanation: [
+                    "Practicing the A.A. program is like building a house. First I had to pour a big, thick concrete slab on which to erect the house; that, to me, was the equivalent of stopping drinking. But it's pretty uncomfortable living on a concrete slab, unprotected and exposed to the heat, cold, wind and rain. So I built a room on the slab by starting to practice the program. The first room was rickety because I wasn't used to the work. But as time passed, as I practiced the program, I learned to build better rooms. The more I practiced, and the more I built, the more comfortable, and happy, was the home I now have to live in."
+                ]
+            },
+            "1-3": {
+                bookName: "dailyReflections",
+                month: 1,
+                date: 3,
+                title: "POWERLESS",
+                reflection: [
+                    "We admitted we were powerless over alcoholthat our lives had become unmanageable."
+                ],
+                source: {
+                    bookName: "TWELVE STEPS AND TWELVE TRADITIONS",
+                    page: 21
+                },
+                explanation: [
+                    "It is no coincidence that the very first Step mentions powerlessness: An admission of personal powerlessness over alcohol is a cornerstone of the foundation of recovery. I've learned that I do not have the power and control I once thought I had. I am powerless over what people think about me. I am powerless over having just missed the bus. I am powerless over how other people work (or don't work) the Steps. But I've also learned I am not powerless over some things. I am not powerless over my attitudes. I am not powerless over negativity. I am not powerless over assuming responsibility for my own recovery. I have the power to exert a positive influence on myself, my loved ones, and the world in which I live."
+                ]
+            }
+        };
+
+        // Month names
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Days in each month
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // Current state
+        let currentMonth = new Date().getMonth() + 1;
+
+        // Detect if we're using file:// protocol
+        const isFileProtocol = window.location.protocol === 'file:';
+
+        // Initialize the app
+        function init() {
+            const monthSelect = document.getElementById('month-select');
+            monthSelect.value = currentMonth.toString();
+            monthSelect.addEventListener('change', (e) => {
+                currentMonth = parseInt(e.target.value);
+                renderCalendar();
+            });
+
+            renderCalendar();
+            handleRouting();
+
+            // Handle hash changes for navigation
+            window.addEventListener('hashchange', handleRouting);
+
+            // Handle browser back/forward for pushState (web server only)
+            if (!isFileProtocol) {
+                window.addEventListener('popstate', handleRouting);
+            }
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Calculate first day of month
+            const firstDay = new Date(2025, currentMonth - 1, 1).getDay();
+            const days = daysInMonth[currentMonth - 1];
+
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                grid.appendChild(emptyDay);
+            }
+
+            // Add days of month
+            for (let day = 1; day <= days; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = day;
+                dayCell.addEventListener('click', () => {
+                    navigateToReflection(currentMonth, day);
+                });
+                grid.appendChild(dayCell);
+            }
+        }
+
+        // Navigation functions
+        function navigateToReflection(month, date) {
+            if (isFileProtocol) {
+                // Use hash-based routing for local files
+                window.location.hash = `${month}-${date}`;
+            } else {
+                // Use pushState for web servers
+                const path = `/${month}-${date}`;
+                history.pushState({}, '', path);
+                handleRouting();
+            }
+        }
+
+        function navigateToHome() {
+            if (isFileProtocol) {
+                // Use hash-based routing for local files
+                window.location.hash = '';
+            } else {
+                // Use pushState for web servers
+                history.pushState({}, '', '/');
+                handleRouting();
+            }
+        }
+
+        // Routing handler
+        function handleRouting() {
+            let route = '';
+
+            if (isFileProtocol) {
+                // Use hash for file:// protocol
+                route = window.location.hash.substring(1); // Remove the '#'
+            } else {
+                // Use pathname for web servers
+                route = window.location.pathname;
+                if (route === '/index.html') route = '/';
+            }
+
+            if (route === '' || route === '/') {
+                showView('home-view');
+            } else {
+                // Remove leading slash if present
+                route = route.replace(/^\//, '');
+                const match = route.match(/^(\d+)-(\d+)$/);
+                if (match) {
+                    const month = parseInt(match[1]);
+                    const date = parseInt(match[2]);
+                    showReflection(month, date);
+                } else {
+                    showView('error-view');
+                }
+            }
+        }
+
+        // Show specific view
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Show reflection
+        function showReflection(month, date) {
+            const key = `${month}-${date}`;
+            const reflection = dailyReflections[key];
+
+            if (!reflection || month < 1 || month > 12 || date < 1 || date > 31) {
+                showView('error-view');
+                return;
+            }
+
+            // Update reflection content
+            document.getElementById('reflection-date').textContent =
+                `${monthNames[month - 1]} ${date}`;
+            document.getElementById('reflection-title').textContent =
+                reflection.title;
+
+            // Render reflection paragraphs
+            const reflectionTextEl = document.getElementById('reflection-text');
+            reflectionTextEl.innerHTML = '';
+            reflection.reflection.forEach(para => {
+                const p = document.createElement('p');
+                p.className = 'reflection-text';
+                p.textContent = para;
+                reflectionTextEl.appendChild(p);
+            });
+
+            // Render source
+            document.getElementById('reflection-source').textContent =
+                `${reflection.source.bookName}, p. ${reflection.source.page}`;
+
+            // Render explanation paragraphs
+            const explanationTextEl = document.getElementById('explanation-text');
+            explanationTextEl.innerHTML = '';
+            reflection.explanation.forEach(para => {
+                const p = document.createElement('p');
+                p.className = 'reflection-text';
+                p.textContent = para;
+                explanationTextEl.appendChild(p);
+            });
+
+            showView('reflection-view');
+        }
+
+        // API Access - expose data as JSON
+        window.getDailyReflection = function(month, date) {
+            const key = `${month}-${date}`;
+            return dailyReflections[key] || null;
+        };
+
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
