@@ -469,8 +469,29 @@ index.html#12-25  # December 25</pre>
         // Detect if we're using file:// protocol
         const isFileProtocol = window.location.protocol === 'file:';
 
+        // Check if JSON format is requested
+        function isJsonRequested() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('format') === 'json';
+        }
+
+        // Return JSON response
+        function returnJson(data) {
+            // Clear the page and show JSON
+            document.body.innerHTML = `<pre style="font-family: monospace; padding: 20px; background: #2d2d2d; color: #f8f8f2; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>`;
+            // Also set proper content type hint
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+        }
+
         // Initialize the app
         function init() {
+            // Check if JSON format is requested first
+            if (isJsonRequested()) {
+                handleJsonRequest();
+                return;
+            }
+
             const monthSelect = document.getElementById('month-select');
             monthSelect.value = currentMonth.toString();
             monthSelect.addEventListener('change', (e) => {
@@ -487,6 +508,56 @@ index.html#12-25  # December 25</pre>
             // Handle browser back/forward for pushState (web server only)
             if (!isFileProtocol) {
                 window.addEventListener('popstate', handleRouting);
+            }
+        }
+
+        // Handle JSON API requests
+        function handleJsonRequest() {
+            let route = '';
+
+            if (isFileProtocol) {
+                route = window.location.hash.substring(1);
+            } else {
+                route = window.location.pathname;
+                if (route === '/index.html') route = '/';
+            }
+
+            // Remove leading slash
+            route = route.replace(/^\//, '');
+
+            // Parse the route
+            const match = route.match(/^(\d+)-(\d+)$/);
+
+            if (match) {
+                const month = parseInt(match[1]);
+                const date = parseInt(match[2]);
+                const key = `${month}-${date}`;
+                const reflection = dailyReflections[key];
+
+                if (reflection && month >= 1 && month <= 12 && date >= 1 && date <= 31) {
+                    returnJson(reflection);
+                } else {
+                    returnJson({
+                        error: "Not Found",
+                        message: "The requested reflection does not exist.",
+                        code: 404
+                    });
+                }
+            } else if (route === '' || route === '/') {
+                // Return all available dates
+                returnJson({
+                    message: "AA Daily Reflections API",
+                    usage: "Add ?format=json to any date URL to get JSON response",
+                    example: "https://mkp715.github.io/DailyReflections/1-2?format=json",
+                    availableDates: Object.keys(dailyReflections)
+                });
+            } else {
+                returnJson({
+                    error: "Invalid Format",
+                    message: "Invalid date format. Use format: {month}-{date}",
+                    example: "1-2 for January 2",
+                    code: 400
+                });
             }
         }
 
