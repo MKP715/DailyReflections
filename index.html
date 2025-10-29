@@ -320,26 +320,32 @@
             <div class="home-content">
                 <div class="card api-docs">
                     <h2>API Documentation</h2>
-                    <p>Access daily reflections programmatically using our simple URL-based API.</p>
+                    <p>Access all 365 daily reflections programmatically using our simple URL-based API. <strong>No separate JSON files needed</strong> - everything is served dynamically from a single HTML file!</p>
 
-                    <h3>Endpoint Format</h3>
-                    <p>To retrieve a specific daily reflection, use the following URL format:</p>
-                    <pre>https://aadailyreflections.org/{month}-{date}</pre>
-                    <p><small><em>Note: When testing locally, use hash-based URLs: <code>index.html#{month}-{date}</code></em></small></p>
+                    <h3>How It Works</h3>
+                    <p>Add <code>?format=json</code> to any URL to get a JSON response instead of HTML:</p>
+                    <pre># Get a specific reflection
+https://mkp715.github.io/DailyReflections/#1-2?format=json
 
-                    <h3>Parameters</h3>
+# Get list of all available reflections
+https://mkp715.github.io/DailyReflections/?format=json</pre>
+
+                    <h3>Date Format</h3>
                     <ul>
                         <li><code>month</code> - Numeric month (1-12)</li>
                         <li><code>date</code> - Numeric day (1-31)</li>
+                        <li>Format: <code>#month-date</code></li>
                     </ul>
 
                     <h3>Example Requests</h3>
-                    <pre>https://aadailyreflections.org/1-2    # January 2
-https://aadailyreflections.org/12-25  # December 25
+                    <pre># January 2
+https://mkp715.github.io/DailyReflections/#1-2?format=json
+
+# December 25
+https://mkp715.github.io/DailyReflections/#12-25?format=json
 
 # Local testing
-index.html#1-2    # January 2
-index.html#12-25  # December 25</pre>
+file:///path/to/index.html#1-2?format=json</pre>
 
                     <h3>Response Format</h3>
                     <p>The API returns a JSON object with the following structure:</p>
@@ -356,8 +362,13 @@ index.html#12-25  # December 25</pre>
   "explanation": ["paragraph 1", "paragraph 2", ...]
 }</pre>
 
-                    <h3>Error Handling</h3>
-                    <p>If an invalid date is provided, you'll receive an error page indicating that the data does not exist.</p>
+                    <h3>Benefits</h3>
+                    <ul>
+                        <li>Single HTML file serves all 365 reflections</li>
+                        <li>Fast and efficient - no server-side processing needed</li>
+                        <li>Works on GitHub Pages static hosting</li>
+                        <li>Same URL structure for HTML and JSON views</li>
+                    </ul>
                 </div>
 
                 <div class="card calendar-widget">
@@ -513,19 +524,10 @@ index.html#12-25  # December 25</pre>
 
         // Handle JSON API requests
         function handleJsonRequest() {
-            let route = '';
+            // Get the hash without the leading #
+            let route = window.location.hash.substring(1);
 
-            if (isFileProtocol) {
-                route = window.location.hash.substring(1);
-            } else {
-                route = window.location.pathname;
-                if (route === '/index.html') route = '/';
-            }
-
-            // Remove leading slash
-            route = route.replace(/^\//, '');
-
-            // Parse the route
+            // Parse the route (format: month-date or empty)
             const match = route.match(/^(\d+)-(\d+)$/);
 
             if (match) {
@@ -543,19 +545,24 @@ index.html#12-25  # December 25</pre>
                         code: 404
                     });
                 }
-            } else if (route === '' || route === '/') {
+            } else if (route === '') {
                 // Return all available dates
                 returnJson({
                     message: "AA Daily Reflections API",
                     usage: "Add ?format=json to any date URL to get JSON response",
-                    example: "https://mkp715.github.io/DailyReflections/1-2?format=json",
-                    availableDates: Object.keys(dailyReflections)
+                    examples: [
+                        "https://mkp715.github.io/DailyReflections/#1-2?format=json",
+                        "https://mkp715.github.io/DailyReflections/?format=json"
+                    ],
+                    note: "All 365 reflections are served dynamically from a single HTML file - no separate JSON files needed!",
+                    availableDates: Object.keys(dailyReflections),
+                    totalReflections: Object.keys(dailyReflections).length
                 });
             } else {
                 returnJson({
                     error: "Invalid Format",
-                    message: "Invalid date format. Use format: {month}-{date}",
-                    example: "1-2 for January 2",
+                    message: "Invalid date format. Use format: #month-date",
+                    example: "#1-2 for January 2",
                     code: 400
                 });
             }
