@@ -482,8 +482,21 @@ file:///path/to/index.html#1-2?format=json</pre>
 
         // Check if JSON format is requested
         function isJsonRequested() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('format') === 'json';
+            // Check in the regular query string first
+            const searchParams = new URLSearchParams(window.location.search);
+            if (searchParams.get('format') === 'json') {
+                return true;
+            }
+
+            // Check within the hash (e.g., #1-2?format=json)
+            const hash = window.location.hash;
+            if (hash.includes('?')) {
+                const hashQueryString = hash.split('?')[1];
+                const hashParams = new URLSearchParams(hashQueryString);
+                return hashParams.get('format') === 'json';
+            }
+
+            return false;
         }
 
         // Return JSON response
@@ -526,6 +539,11 @@ file:///path/to/index.html#1-2?format=json</pre>
         function handleJsonRequest() {
             // Get the hash without the leading #
             let route = window.location.hash.substring(1);
+
+            // Remove query parameters from the route if present (e.g., "1-2?format=json" -> "1-2")
+            if (route.includes('?')) {
+                route = route.split('?')[0];
+            }
 
             // Parse the route (format: month-date or empty)
             const match = route.match(/^(\d+)-(\d+)$/);
